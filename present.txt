@@ -1,0 +1,128 @@
+🔴 RK — PRESENTATION (WITH CODE)
+🔹 1. Introduction
+
+🗣️ Say:
+
+“I will be explaining the core part of our project, which is the Firefly Optimization Algorithm
+ used to improve the model’s performance.”
+
+🔹 2. Parameters Setup
+beta0 = 1.0
+gamma = 0.3
+alpha = 0.25
+
+num_fireflies = 20
+max_iterations = 25
+
+min_C, max_C = 0.01, 10
+
+🗣️ Say:
+
+“We start by defining parameters for the Firefly Algorithm.
+ Beta controls attraction, gamma controls how attraction decreases with distance, 
+ and alpha introduces randomness. We also define the number of fireflies and iterations, 
+ along with the range of values for the hyperparameter C.”
+
+🔹 3. Fitness Function
+def fitness(c):
+    c = max(0.001, c)
+    model = LogisticRegression(C=c, max_iter=200)
+    model.fit(X_train, y_train)
+    return accuracy_score(y_test, model.predict(X_test))
+
+🗣️ Say:
+
+“The fitness function evaluates how good a particular value of C is. 
+It trains a Logistic Regression model with that value and returns the accuracy on test data.”
+
+🔹 4. Initialize Fireflies
+positions = np.random.uniform(min_C, max_C, num_fireflies)
+brightness = np.zeros(num_fireflies)
+
+best_history = []
+mean_history = []
+position_history = []
+
+🗣️ Say:
+
+“Each firefly represents a possible value of C.
+ We initialize them randomly within a defined range, and their brightness will represent their accuracy.”
+
+🔹 5. Start Optimization Loop
+for iteration in range(max_iterations):
+
+🗣️ Say:
+
+“We then run the algorithm for multiple iterations to gradually improve the solutions.”
+
+🔹 6. Evaluate Brightness
+for i in range(num_fireflies):
+    brightness[i] = fitness(positions[i])
+
+🗣️ Say:
+
+“In each iteration, we evaluate the brightness of every firefly using the fitness function.
+ Higher accuracy means higher brightness.”
+
+🔹 7. Store Progress
+best = np.max(brightness)
+mean = np.mean(brightness)
+
+best_history.append(best)
+mean_history.append(mean)
+position_history.append(positions.copy())
+
+🗣️ Say:
+
+“We store the best and average performance at each iteration to track optimization progress.”
+
+🔹 8. Movement Logic (Core)
+for i in range(num_fireflies):
+    for j in range(num_fireflies):
+
+        if brightness[j] > brightness[i]:
+
+🗣️ Say:
+
+“Each firefly moves toward brighter fireflies, meaning better solutions guide weaker ones.”
+
+🔹 9. Distance Calculation
+d = abs(positions[i] - positions[j])
+
+🗣️ Say:
+
+“We calculate the distance between two fireflies based on their parameter values.”
+
+🔹 10. Attractiveness
+beta = beta0 * np.exp(-gamma * d**2)
+
+🗣️ Say:
+
+“Attractiveness decreases with distance, meaning closer solutions influence each other more strongly.”
+
+🔹 11. Position Update
+positions[i] += beta * (positions[j] - positions[i]) + alpha * (np.random.rand() - 0.5)
+
+🗣️ Say:
+
+“The position is updated based on attraction toward better solutions,
+ along with a small random component to explore new possibilities.”
+
+🔹 12. Boundary Control
+positions[i] = np.clip(positions[i], min_C, max_C)
+
+🗣️ Say:
+
+“We ensure that the updated values stay within the valid range.”
+
+🔹 13. Closing Line
+
+🗣️ Say:
+
+“Through this process, the algorithm iteratively finds the best value of C that maximizes model accuracy.”
+
+🔹 Handoff
+
+🗣️ Say:
+
+“Now I’ll hand it over to Dillu, who will explain the results and analysis.”
