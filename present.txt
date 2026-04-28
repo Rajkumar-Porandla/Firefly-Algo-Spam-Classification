@@ -19,7 +19,8 @@ min_C, max_C = 0.01, 10
 🗣️ Say:
 
 “We start by defining parameters for the Firefly Algorithm.
- Beta controls attraction, gamma controls how attraction decreases with distance, 
+ Beta controls attraction, 
+ gamma controls how attraction decreases with distance, 
  and alpha introduces randomness. We also define the number of fireflies and iterations, 
  along with the range of values for the hyperparameter C.”
 

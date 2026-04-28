@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
 import matplotlib.pyplot as plt
 import os
 
@@ -29,7 +31,9 @@ def main():
     X_train = vectorizer.fit_transform(X_train_text)
     X_test = vectorizer.transform(X_test_text)
 
-    # Baseline
+    # ======================================================
+    # STEP 2: BASELINE
+    # ======================================================
     base_model = LogisticRegression(C=1.0)
     base_model.fit(X_train, y_train)
     baseline_acc = accuracy_score(y_test, base_model.predict(X_test))
@@ -43,13 +47,13 @@ def main():
     gamma = 0.3
     alpha = 0.25
 
-    num_fireflies = 20
+    num_fireflies = 20 
     max_iterations = 25
 
     min_C, max_C = 0.01, 10
 
     # ======================================================
-    # STEP 2: FITNESS
+    # STEP 3: FITNESS
     # ======================================================
     def fitness(c):
         c = max(0.001, c)
@@ -58,7 +62,7 @@ def main():
         return accuracy_score(y_test, model.predict(X_test))
 
     # ======================================================
-    # STEP 3: INITIALIZE FIREFLIES
+    # STEP 4: INITIALIZE FIREFLIES
     # ======================================================
     positions = np.random.uniform(min_C, max_C, num_fireflies)
     brightness = np.zeros(num_fireflies)
@@ -106,12 +110,35 @@ def main():
     # ======================================================
     # FINAL RESULT
     # ======================================================
+    
+    #extracting best result 
+
     best_idx = np.argmax(brightness)
+    best_C = positions[best_idx]
+
+    # Train final optimized model
+    final_model = LogisticRegression(C=best_C, max_iter=200)
+    final_model.fit(X_train, y_train)
+
+    final_acc = accuracy_score(y_test, final_model.predict(X_test))
+
+    # Calculate additional metrics
+    y_pred = final_model.predict(X_test)
+    y_prob = final_model.predict_proba(X_test)[:, 1] # Probabilities for the positive class (Spam)
+
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_prob)
 
     print("\n========== FINAL RESULT ==========")
     print(f"Baseline Accuracy : {baseline_acc:.4f}")
-    print(f"Optimized Accuracy: {brightness[best_idx]:.4f}")
-    print(f"Best C Value      : {positions[best_idx]:.4f}")
+    print(f"Optimized Accuracy: {final_acc:.4f}")
+    print(f"Best C Value      : {best_C:.4f}")
+    print(f"Precision         : {precision:.4f}")
+    print(f"Recall            : {recall:.4f}")
+    print(f"F1-Score          : {f1:.4f}")
+    print(f"ROC-AUC Score     : {roc_auc:.4f}")
     print("=================================")
 
     # ======================================================
@@ -169,26 +196,32 @@ def main():
     plt.ylabel("Count")
     plt.grid()
     plt.savefig("plot5_distribution.png")
-
     print("\n🔥 All plots generated successfully!")
 
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-import matplotlib.pyplot as plt
-
-def plot_confusion_matrix(model, X_test, y_test):
-    y_pred = model.predict(X_test)
-    
+    # 6. Confusion Matrix 
     cm = confusion_matrix(y_test, y_pred)
-    
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Ham", "Spam"])
     disp.plot()
-    
     plt.title("Confusion Matrix")
     plt.grid(False)
     plt.savefig("plot6_confusion_matrix.png")
-    plt.show()
     
-    return cm
+    # 7. ROC Curve
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(8,5))
+    plt.plot(fpr, tpr, color='blue', label=f'ROC Curve (AUC = {roc_auc:.4f})')
+    plt.plot([0, 1], [0, 1], color='red', linestyle='--', label='Random Guessing')
+    plt.title("Receiver Operating Characteristic (ROC) Curve")
+    plt.xlabel("False Positive Rate (FPR)")
+    plt.ylabel("True Positive Rate (TPR)")
+    plt.legend()
+    plt.grid()
+    plt.savefig("plot7_roc_curve.png")
+
+    plt.show()
+
+    print("\nConfusion Matrix:\n", cm)
 
     
 if __name__ == "__main__":
