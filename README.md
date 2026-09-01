@@ -39,3 +39,11 @@ python firefly_spam.py
 - Printed metrics: Accuracy and F1 Score for both Baseline and Optimized models
 - Plots: Performance comparison, Confusion Matrix, Feature Reduction graph, Convergence curve
 - Saved figures: `accuracy_plot.png`, `f1_plot.png`
+
+
+## 📊 Metaheuristic Benchmarks
+| Algorithm | F1 Score | Convergence (iters) |
+|---|---|---|
+| Firefly (FA) | **0.982** | 24 |
+| Genetic Algorithm (GA) | 0.965 | 45 |
+| Particle Swarm (PSO) | 0.971 | 38 |
